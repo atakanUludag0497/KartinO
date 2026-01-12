@@ -5,43 +5,43 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.kartino.kartino.data.database.DatabaseModule
+import com.kartino.kartino.data.repository.CardRepository
+import com.kartino.kartino.navigation.NavGraph
+import com.kartino.kartino.navigation.NavRoutes
 import com.kartino.kartino.ui.theme.KartinOTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
+        // Initialize database and repository
+        val database = DatabaseModule.getDatabase(applicationContext)
+        val repository = CardRepository(
+            bankCardDao = database.bankCardDao(),
+            customCardDao = database.customCardDao(),
+            customFieldDao = database.customFieldDao()
+        )
+        
         setContent {
             KartinOTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = rememberNavController()
+                    NavGraph(
+                        navController = navController,
+                        repository = repository,
+                        startDestination = NavRoutes.SPLASH
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    KartinOTheme {
-        Greeting("Android")
     }
 }
